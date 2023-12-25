@@ -1,18 +1,53 @@
 import { useContext } from 'react';
-import { AuthContext } from '../providers/AuthProvider';
+import { AuthContext } from '../../providers/AuthProvider';
+import Swal from 'sweetalert2';
+import { NavLink, useNavigate } from 'react-router-dom';
+import useAxiosPublic from '../../hooks/useAxiosPublic';
+import SocialLogin from '../../components/SocialLogin';
 
 const Register = () => {
-  const {signUp} = useContext(AuthContext);
+  const {signUp, updateUserProfile} = useContext(AuthContext);
+  const navigate = useNavigate()
+  const axiosPublic = useAxiosPublic();
+
+
   const handleRegister = (event)=>{
     event.preventDefault();
     const form = event.target;
     const email =  form.email.value;
     const password =  form.password.value;
+    const name = form.name.value;
+    const photourl = form.photourl.value;
     console.log(email, password);
 
     signUp(email, password)
     .then(result => {
       console.log(result.user)
+      updateUserProfile(name, photourl)
+      .then(()=>{
+        //console.log('User profile info updated');
+        // create user entry in database 
+        const userInfo = {
+            name: name,
+            email: email,
+        }
+        axiosPublic.post('/users', userInfo)
+        .then(res=>{
+          if(res.data.insertedId){
+            console.log('user added to the database');
+            Swal.fire({
+              position: "center",
+              icon: "success",
+              title: "User created successfully",
+              showConfirmButton: false,
+              timer: 1500
+            });
+            navigate('/')
+          }
+        })
+        
+      })
+      .catch(error => console.log(error))
     })
     .catch(error => console.log(error))
   }
@@ -33,6 +68,12 @@ const Register = () => {
           </div>
           <div className="form-control">
             <label className="label">
+              <span className="label-text">Photo URL</span>
+            </label>
+            <input type="text" name='photourl' placeholder="Your Photo URL" className="input input-bordered" />
+          </div>
+          <div className="form-control">
+            <label className="label">
               <span className="label-text">Email</span>
             </label>
             <input type="email" name='email' placeholder="email" className="input input-bordered" required />
@@ -42,14 +83,13 @@ const Register = () => {
               <span className="label-text">Password</span>
             </label>
             <input type="password" name='password' autoComplete='on' placeholder="password" className="input input-bordered" required />
-            <label className="label">
-              <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
-            </label>
+            <NavLink to="/login">Already Have an account please <span className='text-red-500 uppercase'>Login</span></NavLink>
           </div>
           <div className="form-control mt-6">
-            <button className="btn btn-primary">Login</button>
+            <button className="btn btn-primary">Register</button>
           </div>
         </form>
+        <SocialLogin></SocialLogin>
       </div>
     </div>
   </div>

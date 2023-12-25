@@ -1,11 +1,14 @@
 import { useContext } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
-import { NavLink, useNavigate,  } from "react-router-dom";
+import { NavLink, useLocation, useNavigate,  } from "react-router-dom";
 import Swal from "sweetalert2";
+import SocialLogin from "../../components/SocialLogin";
 
 const Login = () => {
-  const {logIn, user} = useContext(AuthContext); 
+  const {logIn, user, loginWithGoogle} = useContext(AuthContext); 
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/"
   const handleLogin =(event)=>{
     event.preventDefault();
     const form = event.target;
@@ -16,16 +19,16 @@ const Login = () => {
       Swal.fire({
         position: "center",
         icon: "success",
-        title: "Your work has been saved",
+        title: "You hvae successfully login",
         showConfirmButton: false,
         timer: 1500
       });
-      if(resutl.user){
-        return navigate('/')
-      }
+      navigate(from, {replace: true});
+      
   })
     .catch(error=>console.log(error))
   }
+  
   return (
     <div className="hero min-h-screen bg-base-200">
       <div className="hero-content flex-col lg:flex-row-reverse">
@@ -69,7 +72,10 @@ const Login = () => {
             <div className="form-control mt-6">
               <button className="btn btn-primary">Login</button>
             </div>
-          </form>
+            
+          </form> 
+          <div className="divider"></div>
+          <SocialLogin></SocialLogin>
         </div>
       </div>
     </div>

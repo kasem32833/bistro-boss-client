@@ -14,7 +14,7 @@ const useMenu = ()=>{
         })
     },[])
 
-    console.log(menus);
+    // console.log(menus);
 
     return [menus, loading]
 
